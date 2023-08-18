@@ -12,8 +12,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
 import com.bikram.onboardingapp.data.NavItems
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,9 +25,7 @@ fun CustomAppBar(selectedIndex: MutableState<Int>) {
                     text = NavItems.fromInt(selectedIndex.value).name,
                     modifier = Modifier.align(Alignment.Center),
                     color = Color.White,
-                    style = TextStyle(
-                        fontSize = 22.sp
-                    )
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
