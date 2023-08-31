@@ -9,7 +9,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import com.bikram.onboardingapp.data.NavItems
+import com.bikram.onboardingapp.model.NavItems
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

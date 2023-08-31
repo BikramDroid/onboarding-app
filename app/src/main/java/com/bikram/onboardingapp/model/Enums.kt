@@ -1,4 +1,4 @@
-package com.bikram.onboardingapp.data
+package com.bikram.onboardingapp.model
 
 enum class NavItems(val value: Int) {
     Home(0),
