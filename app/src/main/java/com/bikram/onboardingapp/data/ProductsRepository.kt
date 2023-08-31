@@ -2,6 +2,7 @@ package com.bikram.onboardingapp.data
 
 import com.bikram.onboardingapp.model.Product
 import com.bikram.onboardingapp.network.ProductsApiService
+import javax.inject.Inject
 
 /**
  * Repository that fetch products list from productsApi.
@@ -14,7 +15,7 @@ interface ProductsRepository {
 /**
  * Network Implementation of Repository that products list from productsApi.
  */
-class NetworkProductsRepository(
+class NetworkProductsRepository @Inject constructor(
     private val marsApiService: ProductsApiService
 ) : ProductsRepository {
     /** Fetches list of products from productsApi*/

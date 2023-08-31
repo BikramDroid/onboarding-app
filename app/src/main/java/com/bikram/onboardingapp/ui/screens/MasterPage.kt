@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
@@ -29,7 +29,7 @@ fun MasterPage() {
             Surface(modifier = Modifier.fillMaxSize()) {
                 when (selectedIndex.value) {
                     0 -> {
-                        val homeViewModel: HomeViewModel = viewModel()
+                        val homeViewModel: HomeViewModel = hiltViewModel()
                         HomeScreen(homeViewModel.productsUiState)
                     }
 

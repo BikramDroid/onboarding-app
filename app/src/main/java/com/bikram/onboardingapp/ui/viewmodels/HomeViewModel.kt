@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.bikram.onboardingapp.data.ProductsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * UI state for the Home screen
@@ -18,7 +21,9 @@ sealed interface ProductsUiState {
     object Loading : ProductsUiState
 }
 
-class HomeViewModel() : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(private val productsRepository: ProductsRepository) :
+    ViewModel() {
     //The mutable State that stores the status of the most recent request
     var productsUiState: ProductsUiState by mutableStateOf(ProductsUiState.Loading)
         private set
@@ -33,16 +38,15 @@ class HomeViewModel() : ViewModel() {
         viewModelScope.launch {
             productsUiState = ProductsUiState.Loading
             productsUiState = try {
-                delay(1000L)
-
-                //todo call api
+                val listResult = productsRepository.getProductsList()
                 ProductsUiState.Success(
-                    "Success: x products retrieved"
+                    "Success: ${listResult.size} products retrieved"
                 )
             } catch (e: IOException) {
                 ProductsUiState.Error
+            } catch (e: HttpException) {
+                ProductsUiState.Error
             }
-            //todo handle other states
         }
     }
 }
