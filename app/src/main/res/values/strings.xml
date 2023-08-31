@@ -3,4 +3,7 @@
     <string name="homepage">Homepage!</string>
     <string name="receipts">View your receipts here!</string>
     <string name="profile">View your profile here!</string>
+
+    <string name="loading_failed">Failed to load</string>
+    <string name="loading">Loading</string>
 </resources>
