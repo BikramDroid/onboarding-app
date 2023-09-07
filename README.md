@@ -29,3 +29,13 @@ Coming Soon!
         * [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) that store/manage UI state
     * [Retrofit](https://square.github.io/retrofit/) for networking
     * [Coil](https://github.com/coil-kt/coil) for image loading
+    * [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) for dependency injection
+
+## License
+
+```
+Copyright 2023 Bikramjit Singh
+
+Licensed under bla bla bla;
+you may not use this project.... just kidding use whatever way you want! 
+```

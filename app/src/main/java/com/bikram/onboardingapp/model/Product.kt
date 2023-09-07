@@ -16,4 +16,6 @@ data class Product(
     val category: String,
     @SerialName(value = "image")
     val imgSrc: String
-)
+) {
+    val priceKr: String by lazy { String.format("%.2f", price * 10) }
+}

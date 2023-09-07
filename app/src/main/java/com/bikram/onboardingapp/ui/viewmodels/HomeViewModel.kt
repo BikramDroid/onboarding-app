@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bikram.onboardingapp.data.ProductsRepository
+import com.bikram.onboardingapp.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -16,7 +17,7 @@ import javax.inject.Inject
  * UI state for the Home screen
  */
 sealed interface ProductsUiState {
-    data class Success(val products: String) : ProductsUiState
+    data class Success(val products: List<Product>) : ProductsUiState
     object Error : ProductsUiState
     object Loading : ProductsUiState
 }
@@ -39,9 +40,7 @@ class HomeViewModel @Inject constructor(private val productsRepository: Products
             productsUiState = ProductsUiState.Loading
             productsUiState = try {
                 val listResult = productsRepository.getProductsList()
-                ProductsUiState.Success(
-                    "Success: ${listResult.size} products retrieved"
-                )
+                ProductsUiState.Success(listResult)
             } catch (e: IOException) {
                 ProductsUiState.Error
             } catch (e: HttpException) {

@@ -70,6 +70,7 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.44.2")
