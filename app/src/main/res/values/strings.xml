@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Supermarket App</string>
     <string name="homepage">Homepage!</string>
-    <string name="receipts">View your receipts here!</string>
+    <string name="receipts">See how much you have spent/saved, and view your receipts!</string>
     <string name="profile">View your profile here!</string>
 
     <string name="loading_failed">Failed to load</string>
