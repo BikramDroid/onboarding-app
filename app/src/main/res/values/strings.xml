@@ -9,6 +9,8 @@
     <string name="product_image">Product image</string>
 
     <string name="popular_products">Popular products</string>
+    <string name="newly_arrived">Newly arrived</string>
+    <string name="only_for_you">Only for you</string>
     <string name="see_more">See more</string>
     <string name="shopping_trip">Your shopping trips</string>
 </resources>

@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -88,146 +89,176 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
-        contentPadding = PaddingValues(10.dp)
+        contentPadding = PaddingValues(10.dp),
+        modifier = Modifier.padding(top = 55.dp, bottom = 55.dp)
     ) {
         item {
-            Column(
+            BannerCard()
+        }
+
+        item {
+            ProductsRow(stringResource(id = R.string.popular_products), products)
+        }
+
+        item {
+            BannerCard()
+        }
+
+        item {
+            ProductsRow(stringResource(id = R.string.newly_arrived), products)
+        }
+        //to be followed by more stuff
+    }
+}
+
+@Composable
+private fun ProductsRow(rowDescription: String, products: List<Product>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(5.dp)
+    ) {
+        CustomSpacer(25.dp)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = rowDescription,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = stringResource(R.string.see_more),
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        CustomSpacer()
+        ProductsCard(products)
+
+        CustomSpacer(25.dp)
+    }
+}
+
+@Composable
+private fun ProductsCard(products: List<Product>) {
+    LazyRow(
+        state = rememberLazyListState(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        items(products.shuffled()) {
+            val product = it
+
+            Card(
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 5.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 5.dp, end = 15.dp, top = 50.dp)
+                    .height(248.dp)
             ) {
-                CustomSpacer()
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .padding(10.dp)
+                            .background(Color.White, shape = RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                //todo handle
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(context = LocalContext.current)
+                                .data(product.imgSrc)
+                                .crossfade(true)
+                                .build(),
+                            error = painterResource(R.drawable.loading_img),
+                            placeholder = painterResource(R.drawable.loading_img),
+                            contentDescription = stringResource(R.string.product_image),
+                            contentScale = ContentScale.Inside
+                        )
+                    }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                    CustomSpacer()
+
                     Text(
-                        text = stringResource(R.string.popular_products),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.primary
+                        text = product.title,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(start = 8.dp, end = 8.dp)
+                            .width(150.dp)
                     )
-                    Text(
-                        text = stringResource(R.string.see_more),
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
 
-                CustomSpacer()
+                    CustomSpacer(6.dp)
 
-                //Popular products
-                LazyRow(
-                    state = rememberLazyListState(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp)
-                ) {
-                    items(products) {
-                        val product = it
-
-                        Card(
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 10.dp
-                            ),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.White,
-                            ),
-                            modifier = Modifier
-                                .height(248.dp)
-                        ) {
-                            Column {
-                                Box(
-                                    modifier = Modifier
-                                        .size(150.dp)
-                                        .padding(10.dp)
-                                        .background(Color.White, shape = RoundedCornerShape(10.dp))
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .clickable {
-                                            //todo handle
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context = LocalContext.current)
-                                            .data(product.imgSrc)
-                                            .crossfade(true)
-                                            .build(),
-                                        error = painterResource(R.drawable.loading_img),
-                                        placeholder = painterResource(R.drawable.loading_img),
-                                        contentDescription = stringResource(R.string.product_image),
-                                        contentScale = ContentScale.Inside
-                                    )
-                                }
-
-                                CustomSpacer()
-
-                                Text(
-                                    text = product.title,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier
-                                        .padding(start = 8.dp, end = 8.dp)
-                                        .width(150.dp)
-                                )
-
-                                CustomSpacer(6.dp)
-
-                                Row(
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "kr ${product.priceKr}",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(8.dp)
-                                    )
-                                }
-                            }
-                        }
+                    Row(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "kr ${product.priceKr}",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
                 }
             }
         }
+    }
+}
 
-        item {
-            CustomSpacer(25.dp)
-        }
-
-        item {
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(170.dp)
-            ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context = LocalContext.current)
-                        .data(getRandomBanner())
-                        .crossfade(true)
-                        .build(),
-                    error = painterResource(R.drawable.loading_img),
-                    placeholder = painterResource(R.drawable.loading_img),
-                    contentDescription = stringResource(R.string.product_image),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-
-        item {
-            CustomSpacer(20.dp)
-        }
-
-        //to be followed by more stuff
+@Composable
+private fun BannerCard() {
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 5.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(170.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(getRandomBanner())
+                .crossfade(true)
+                .build(),
+            error = painterResource(R.drawable.loading_img),
+            placeholder = painterResource(R.drawable.loading_img),
+            contentDescription = stringResource(R.string.product_image),
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
 //get a random banner everytime
 private fun getRandomBanner(): Int {
-    val res = intArrayOf(R.drawable.banner_1, R.drawable.banner_2, R.drawable.banner_3)
+    val res = intArrayOf(
+        R.drawable.banner_1, R.drawable.banner_2, R.drawable.banner_3, R.drawable.banner_4,
+        R.drawable.banner_5, R.drawable.banner_6, R.drawable.banner_7, R.drawable.banner_8
+    )
+
     return res.random()
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun HomeScreenPreview() {
+    HomeScreen(ProductsUiState.Loading)
 }

@@ -19,7 +19,8 @@ fun CustomAppBar(selectedIndex: MutableState<Int>) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = NavItems.fromInt(selectedIndex.value).name,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
