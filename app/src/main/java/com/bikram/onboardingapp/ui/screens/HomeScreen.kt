@@ -14,14 +14,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -97,6 +106,10 @@ fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
         }
 
         item {
+            CategoryRow()
+        }
+
+        item {
             ProductsRow(stringResource(id = R.string.popular_products), products)
         }
 
@@ -107,7 +120,11 @@ fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
         item {
             ProductsRow(stringResource(id = R.string.newly_arrived), products)
         }
-        //to be followed by more stuff
+
+//        Add more?
+//        item {
+//            ProductsRow(stringResource(id = R.string.only_for_you), products)
+//        }
     }
 }
 
@@ -118,7 +135,7 @@ private fun ProductsRow(rowDescription: String, products: List<Product>) {
             .fillMaxSize()
             .padding(5.dp)
     ) {
-        CustomSpacer(25.dp)
+        CustomSpacer(20.dp)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -149,7 +166,7 @@ private fun ProductsCard(products: List<Product>) {
         state = rememberLazyListState(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(products.shuffled()) {
+        items(products.shuffled().take(8)) {
             val product = it
 
             Card(
@@ -162,16 +179,16 @@ private fun ProductsCard(products: List<Product>) {
                 modifier = Modifier
                     .height(248.dp)
             ) {
-                Column {
+                Column(modifier = Modifier
+                    .clickable {
+                        //todo handle
+                    }) {
                     Box(
                         modifier = Modifier
                             .size(150.dp)
                             .padding(10.dp)
                             .background(Color.White, shape = RoundedCornerShape(10.dp))
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                //todo handle
-                            },
+                            .clip(RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
@@ -217,6 +234,54 @@ private fun ProductsCard(products: List<Product>) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CategoryRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        CategoryCard(Icons.Filled.AccountCircle, "men's wear")
+        CategoryCard(Icons.Filled.Phone, "electronics")
+        CategoryCard(Icons.Filled.ShoppingCart, "jewelery")
+        CategoryCard(Icons.Filled.Face, "women's wear")
+    }
+}
+
+@Composable
+private fun CategoryCard(imageVector: ImageVector, categoryTitle: String) {
+    Column(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(5.dp)
+            .clickable {
+                //todo handle
+            },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector, categoryTitle, tint = Color.White,
+            modifier = Modifier
+                .background(
+                    MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(10.dp)
+                )
+                .size(50.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .padding(10.dp)
+        )
+
+        Text(
+            modifier = Modifier.padding(top = 5.dp),
+            text = categoryTitle,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
