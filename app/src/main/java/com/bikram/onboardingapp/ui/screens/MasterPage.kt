@@ -7,6 +7,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -30,7 +32,9 @@ fun MasterPage() {
                 when (selectedIndex.value) {
                     0 -> {
                         val homeViewModel: HomeViewModel = hiltViewModel()
-                        HomeScreen(homeViewModel.productsUiState)
+                        val productsUiState by homeViewModel.productsUiState.collectAsState()
+
+                        HomeScreen(productsUiState)
                     }
 
                     1 -> {
@@ -47,4 +51,10 @@ fun MasterPage() {
             CustomBottomBar(selectedIndex)
         }
     )
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun MasterScreenPreview() {
+    MasterPage()
 }
