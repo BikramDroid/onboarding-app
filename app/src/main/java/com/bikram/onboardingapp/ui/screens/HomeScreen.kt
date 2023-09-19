@@ -1,6 +1,5 @@
 package com.bikram.onboardingapp.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,50 +51,31 @@ import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
 import com.bikram.onboardingapp.model.Product
 import com.bikram.onboardingapp.ui.components.CustomSpacer
+import com.bikram.onboardingapp.ui.components.ErrorScreen
+import com.bikram.onboardingapp.ui.components.LoadingScreen
 import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 
 @Composable
 fun HomeScreen(
-    productsUiState: ProductsUiState, modifier: Modifier = Modifier
+    productsUiState: Any,
+    onMoreButtonClicked: (String) -> Unit
 ) {
     when (productsUiState) {
-        is ProductsUiState.Loading -> InfoScreen(modifier = modifier.fillMaxSize())
+        is ProductsUiState.Loading -> LoadingScreen()
         is ProductsUiState.Success -> ResultScreen(
-            productsUiState.products, modifier = modifier.fillMaxWidth()
+            productsUiState.products, onMoreButtonClicked
         )
 
-        is ProductsUiState.Error -> ErrorScreen(modifier = modifier.fillMaxSize())
-    }
-}
-
-//The home screen displaying the loading message.
-@Composable
-fun InfoScreen(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading_img),
-        contentDescription = stringResource(R.string.loading)
-    )
-}
-
-//The home screen displaying error message.
-@Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_connection_error), contentDescription = ""
-        )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        is ProductsUiState.Error -> ErrorScreen()
     }
 }
 
 //ResultScreen displaying the products retrieved.
 @Composable
-fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
+fun ResultScreen(
+    products: List<Product>,
+    onMoreButtonClicked: (String) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
         contentPadding = PaddingValues(10.dp),
@@ -106,11 +86,15 @@ fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
         }
 
         item {
-            CategoryRow()
+            CategoryRow(onMoreButtonClicked)
         }
 
         item {
-            ProductsRow(stringResource(id = R.string.popular_products), products)
+            ProductsRow(
+                stringResource(id = R.string.popular_products),
+                onMoreButtonClicked,
+                products
+            )
         }
 
         item {
@@ -118,7 +102,11 @@ fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
         }
 
         item {
-            ProductsRow(stringResource(id = R.string.newly_arrived), products)
+            ProductsRow(
+                stringResource(id = R.string.newly_arrived),
+                onMoreButtonClicked,
+                products
+            )
         }
 
 //        Add more?
@@ -129,7 +117,11 @@ fun ResultScreen(products: List<Product>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ProductsRow(rowDescription: String, products: List<Product>) {
+private fun ProductsRow(
+    rowDescription: String,
+    onMoreButtonClicked: (String) -> Unit,
+    products: List<Product>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -149,7 +141,11 @@ private fun ProductsRow(rowDescription: String, products: List<Product>) {
             )
             Text(
                 text = stringResource(R.string.see_more),
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .clickable() {
+                        run { onMoreButtonClicked(rowDescription) }
+                    },
             )
         }
 
@@ -238,28 +234,32 @@ private fun ProductsCard(products: List<Product>) {
 }
 
 @Composable
-private fun CategoryRow() {
+private fun CategoryRow(onMoreButtonClicked: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 20.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        CategoryCard(Icons.Filled.AccountCircle, "men's wear")
-        CategoryCard(Icons.Filled.Phone, "electronics")
-        CategoryCard(Icons.Filled.ShoppingCart, "jewelery")
-        CategoryCard(Icons.Filled.Face, "women's wear")
+        CategoryCard(Icons.Filled.AccountCircle, "Men's wear", onMoreButtonClicked)
+        CategoryCard(Icons.Filled.Phone, "Electronics", onMoreButtonClicked)
+        CategoryCard(Icons.Filled.ShoppingCart, "Jewelery", onMoreButtonClicked)
+        CategoryCard(Icons.Filled.Face, "Women's wear", onMoreButtonClicked)
     }
 }
 
 @Composable
-private fun CategoryCard(imageVector: ImageVector, categoryTitle: String) {
+private fun CategoryCard(
+    imageVector: ImageVector,
+    categoryTitle: String,
+    onMoreButtonClicked: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .wrapContentSize()
             .padding(5.dp)
             .clickable {
-                //todo handle
+                onMoreButtonClicked(categoryTitle)
             },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -325,5 +325,5 @@ private fun getRandomBanner(): Int {
 @Preview(showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(ProductsUiState.Loading)
+    HomeScreen(ProductsUiState.Loading, onMoreButtonClicked = {})
 }

@@ -13,4 +13,7 @@
     <string name="only_for_you">Only for you</string>
     <string name="see_more">See more</string>
     <string name="shopping_trip">Your shopping trips</string>
+    <string name="product_details">Product details</string>
+    <string name="all_products">All products</string>
+    <string name="back_button">Back</string>
 </resources>

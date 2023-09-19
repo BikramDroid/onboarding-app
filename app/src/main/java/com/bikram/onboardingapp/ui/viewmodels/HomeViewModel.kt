@@ -23,6 +23,10 @@ sealed interface ProductsUiState {
 class HomeViewModel @Inject constructor(productsRepository: ProductsRepository) :
     ViewModel() {
     val productsUiState = productsRepository.getProductsList().map {
-        ProductsUiState.Success(it)
+        try {
+            ProductsUiState.Success(it)
+        } catch (e: Exception) {
+            ProductsUiState.Error
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), ProductsUiState.Loading)
 }
