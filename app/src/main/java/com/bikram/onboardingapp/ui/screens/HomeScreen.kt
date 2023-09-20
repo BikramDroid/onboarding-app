@@ -320,7 +320,7 @@ private fun BannerCard() {
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp)
+            .height(145.dp)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context = LocalContext.current)
@@ -330,7 +330,7 @@ private fun BannerCard() {
             error = painterResource(R.drawable.loading_img),
             placeholder = painterResource(R.drawable.loading_img),
             contentDescription = stringResource(R.string.product_image),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillWidth
         )
     }
 }

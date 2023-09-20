@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
@@ -42,6 +44,7 @@ fun ProfileScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(15.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         ProfileImage()
         CustomSpacer(20.dp)
@@ -51,6 +54,8 @@ fun ProfileScreen() {
         CustomProfileRow(text = "Settings", icon = Icons.Filled.Settings)
         CustomProfileRow(text = "Help center", icon = Icons.Filled.Info)
         CustomProfileRow(text = "Logout", icon = Icons.Filled.Close)
+
+        CustomSpacer(50.dp)
     }
 }
 
