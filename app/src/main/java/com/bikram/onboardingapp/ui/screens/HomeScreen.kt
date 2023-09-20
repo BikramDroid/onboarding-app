@@ -58,12 +58,13 @@ import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 @Composable
 fun HomeScreen(
     productsUiState: Any,
-    onMoreButtonClicked: (String) -> Unit
+    onMoreButtonClicked: (String) -> Unit,
+    onDetailsButtonClicked: (Int) -> Unit
 ) {
     when (productsUiState) {
         is ProductsUiState.Loading -> LoadingScreen()
         is ProductsUiState.Success -> ResultScreen(
-            productsUiState.products, onMoreButtonClicked
+            productsUiState.products, onMoreButtonClicked, onDetailsButtonClicked
         )
 
         is ProductsUiState.Error -> ErrorScreen()
@@ -74,7 +75,8 @@ fun HomeScreen(
 @Composable
 fun ResultScreen(
     products: List<Product>,
-    onMoreButtonClicked: (String) -> Unit
+    onMoreButtonClicked: (String) -> Unit,
+    onDetailsButtonClicked: (Int) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
@@ -93,7 +95,9 @@ fun ResultScreen(
             ProductsRow(
                 stringResource(id = R.string.popular_products),
                 onMoreButtonClicked,
-                products
+                onDetailsButtonClicked,
+                products,
+                false
             )
         }
 
@@ -105,13 +109,21 @@ fun ResultScreen(
             ProductsRow(
                 stringResource(id = R.string.newly_arrived),
                 onMoreButtonClicked,
-                products
+                onDetailsButtonClicked,
+                products,
+                true
             )
         }
 
 //        Add more?
 //        item {
-//            ProductsRow(stringResource(id = R.string.only_for_you), products)
+//            ProductsRow(
+//                stringResource(id = R.string.only_for_you),
+//                onMoreButtonClicked,
+//                onDetailsButtonClicked,
+//                products,
+//                false
+//            )
 //        }
     }
 }
@@ -120,7 +132,9 @@ fun ResultScreen(
 private fun ProductsRow(
     rowDescription: String,
     onMoreButtonClicked: (String) -> Unit,
-    products: List<Product>
+    onDetailsButtonClicked: (Int) -> Unit,
+    products: List<Product>,
+    reversed: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -150,19 +164,28 @@ private fun ProductsRow(
         }
 
         CustomSpacer()
-        ProductsCard(products)
+        ProductsCard(products, reversed, onDetailsButtonClicked)
 
         CustomSpacer(25.dp)
     }
 }
 
 @Composable
-private fun ProductsCard(products: List<Product>) {
+private fun ProductsCard(
+    products: List<Product>,
+    reversed: Boolean,
+    onDetailsButtonClicked: (Int) -> Unit
+) {
     LazyRow(
         state = rememberLazyListState(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(products.shuffled().take(8)) {
+        var filteredProducts = products.take(8)
+
+        if (reversed)
+            filteredProducts = products.asReversed().take(8)
+
+        items(filteredProducts) {
             val product = it
 
             Card(
@@ -177,7 +200,7 @@ private fun ProductsCard(products: List<Product>) {
             ) {
                 Column(modifier = Modifier
                     .clickable {
-                        //todo handle
+                        run { onDetailsButtonClicked(it.id) }
                     }) {
                     Box(
                         modifier = Modifier
@@ -325,5 +348,5 @@ private fun getRandomBanner(): Int {
 @Preview(showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(ProductsUiState.Loading, onMoreButtonClicked = {})
+    HomeScreen(ProductsUiState.Loading, onMoreButtonClicked = {}, onDetailsButtonClicked = {})
 }

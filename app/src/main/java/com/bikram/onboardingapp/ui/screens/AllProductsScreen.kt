@@ -43,7 +43,11 @@ import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 import kotlinx.coroutines.delay
 
 @Composable
-fun AllProductsScreen(productsUiState: ProductsUiState, productsCategory: String) {
+fun AllProductsScreen(
+    productsUiState: ProductsUiState,
+    productsCategory: String,
+    onDetailsButtonClicked: (Int) -> Unit
+) {
     var show by remember { mutableStateOf(true) }
 
     LaunchedEffect(key1 = Unit) {
@@ -57,7 +61,7 @@ fun AllProductsScreen(productsUiState: ProductsUiState, productsCategory: String
         when (productsUiState) {
             is ProductsUiState.Loading -> LoadingScreen()
             is ProductsUiState.Success -> ProductsColumn(
-                productsUiState.products, productsCategory
+                productsUiState.products, productsCategory, onDetailsButtonClicked
             )
 
             is ProductsUiState.Error -> ErrorScreen()
@@ -67,7 +71,8 @@ fun AllProductsScreen(productsUiState: ProductsUiState, productsCategory: String
 @Composable
 private fun ProductsColumn(
     products: List<Product>,
-    productsCategory: String
+    productsCategory: String,
+    onDetailsButtonClicked: (Int) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -86,7 +91,7 @@ private fun ProductsColumn(
 
             items(filteredProducts) {
                 ProductItem(
-                    product = it, modifier = Modifier
+                    product = it, onDetailsButtonClicked, modifier = Modifier
                         .fillMaxWidth()
                         .height(135.dp)
                         .padding(8.dp)
@@ -100,6 +105,7 @@ private fun ProductsColumn(
 @Composable
 fun ProductItem(
     product: Product,
+    onDetailsButtonClicked: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -112,7 +118,7 @@ fun ProductItem(
             defaultElevation = 5.dp
         ),
         onClick = {
-            //todo()
+            onDetailsButtonClicked(product.id)
         }
     ) {
         Row {
@@ -160,5 +166,5 @@ fun ProductItem(
 @Preview(showSystemUi = true)
 @Composable
 fun AllProductsScreenPreview() {
-    AllProductsScreen(ProductsUiState.Loading, "")
+    AllProductsScreen(ProductsUiState.Loading, "", onDetailsButtonClicked = { })
 }

@@ -81,9 +81,16 @@ fun MasterPage(navController: NavHostController = rememberNavController()) {
                                             appBarTitle.value = it
                                             navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
                                         },
+                                        onDetailsButtonClicked = {
+                                            appBarTitle.value = ""
+                                            navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                                        }
                                     )
                                 } else {
-                                    HomeScreen(ProductsUiState.Error, onMoreButtonClicked = { })
+                                    HomeScreen(
+                                        ProductsUiState.Error,
+                                        onMoreButtonClicked = { },
+                                        onDetailsButtonClicked = { })
                                 }
                             }
 
@@ -108,15 +115,30 @@ fun MasterPage(navController: NavHostController = rememberNavController()) {
                     val productsUiState by homeViewModel.productsUiState.collectAsState()
                     val category = it.arguments?.getString("productsCategory")
 
-                    if (category != null) {
-                        AllProductsScreen(productsUiState, category)
-                    }
+                    if (category != null)
+                        AllProductsScreen(
+                            productsUiState,
+                            category,
+                            onDetailsButtonClicked = {
+                                appBarTitle.value = ""
+                                navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                            })
+
                 }
 
-                //todo add details screen
-//                composable(route = AppScreen.ProductDetails.name) {
-//                    ProductDetails()
-//                }
+                composable(route = AppScreen.ProductDetails.name + "?productId={productId}",
+                    arguments = listOf(
+                        navArgument("productId") {
+                            type = NavType.IntType
+                            defaultValue = 1
+                        }
+                    )) {
+                    val productsUiState by homeViewModel.productsUiState.collectAsState()
+                    val productId = it.arguments?.getInt("productId")
+
+                    if (productId != null)
+                        ProductDetailsScreen(productsUiState, productId)
+                }
             }
         },
         bottomBar = {
