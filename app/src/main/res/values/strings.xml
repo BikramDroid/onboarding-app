@@ -17,4 +17,5 @@
     <string name="all_products">All products</string>
     <string name="back_button">Back</string>
     <string name="details_fold">Select a product to see its details</string>
+    <string name="coming_soon">Coming soon!</string>
 </resources>
