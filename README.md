@@ -13,7 +13,19 @@ This project presents a modern approach to Android app development. The project 
 
 ## Screens
 
-Coming Soon!
+<p>
+  <img src="screens/s_1.png" width="320" height="700" />
+  &ensp;&ensp;
+  <img src="screens/s_2.png" width="320" height="700" /> 
+  &ensp;&ensp;
+  <img src="screens/s_3.png" width="320" height="700" /> 
+  &ensp;&ensp;
+</p>
+
+* Foldable Support
+<p>
+  <img src="screens/foldable_2.png" width="780" height="680" />
+</p>
 
 ## Description
 
