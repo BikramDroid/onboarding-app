@@ -79,6 +79,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.44.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
+    // Barcode Scanner
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+
     //Others
     implementation("io.github.pushpalroy:jetlime:1.0.3")
 

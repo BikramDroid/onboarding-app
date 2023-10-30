@@ -34,6 +34,7 @@ import androidx.navigation.navArgument
 import com.bikram.onboardingapp.R
 import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
+import com.bikram.onboardingapp.ui.components.CustomToast
 import com.bikram.onboardingapp.ui.components.WindowSize
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
 import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
@@ -77,12 +78,32 @@ private fun MasterPageRegular(
     val appBarTitle = remember { mutableStateOf("") }
 
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val barcodeState by homeViewModel.scannerUiState.collectAsState()
+
+    val barcode = barcodeState.barcodeDetails
+    if (barcode.isNotEmpty()) {
+        barcodeState.barcodeDetails = ""
+        if (barcode == "Couldn't determine")
+            CustomToast(
+                stringResource(id = R.string.not_found),
+                LocalContext.current
+            )
+        else {
+            appBarTitle.value = ""
+            navController.navigate(AppScreen.ProductDetails.name + "?productId=" + barcode)
+        }
+    }
 
     Scaffold(
         topBar = {
             CustomAppBar(selectedIndex, appBarTitle.value,
                 canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = { navController.navigateUp() })
+                navigateUp = {
+                    navController.navigateUp()
+                },
+                searchButton = {
+                    homeViewModel.startScanning()
+                })
         },
         content = {
             NavHost(
@@ -165,7 +186,11 @@ private fun MasterPageRegular(
                     val productId = it.arguments?.getInt("productId")
 
                     if (productId != null)
-                        ProductDetailsScreen(productsUiState, productId)
+                        ProductDetailsScreen(productsUiState, productId,
+                            onDismiss = {
+                                navController.navigateUp()
+                            }
+                        )
                 }
             }
         },
@@ -209,7 +234,7 @@ private fun MasterPageExpanded(
                 )
             }
         else
-            ProductDetailsScreen(productsUiState, selectedProductId)
+            ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {})
     }
 }
 

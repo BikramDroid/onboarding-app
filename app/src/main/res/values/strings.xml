@@ -16,6 +16,8 @@
     <string name="product_details">Product details</string>
     <string name="all_products">All products</string>
     <string name="back_button">Back</string>
+    <string name="search_button">Search</string>
     <string name="details_fold">Select a product to see its details</string>
     <string name="coming_soon">Coming soon!</string>
+    <string name="not_found">No product found</string>
 </resources>

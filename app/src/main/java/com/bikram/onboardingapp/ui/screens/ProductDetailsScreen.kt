@@ -17,18 +17,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.bikram.onboardingapp.R
 import com.bikram.onboardingapp.model.Product
 import com.bikram.onboardingapp.ui.components.CustomSpacer
+import com.bikram.onboardingapp.ui.components.CustomToast
 import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 
 @Composable
-fun ProductDetailsScreen(productsUiState: ProductsUiState, productId: Int) {
-
+fun ProductDetailsScreen(
+    productsUiState: ProductsUiState,
+    productId: Int,
+    onDismiss: () -> Unit,
+) {
     when (productsUiState) {
-        is ProductsUiState.Success -> DetailsScreenContent(
-            product = productsUiState.products[productId - 1],
-            modifier = Modifier.fillMaxSize()
-        )
+        is ProductsUiState.Success ->
+            if (productId > productsUiState.products.size) {
+                CustomToast(stringResource(id = R.string.not_found), LocalContext.current)
+                onDismiss()
+            } else {
+                DetailsScreenContent(
+                    product = productsUiState.products[productId - 1],
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
         else -> {}
     }
@@ -102,7 +113,6 @@ fun DetailsScreenContent(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Light
                     )
-
                 }
             }
         }
