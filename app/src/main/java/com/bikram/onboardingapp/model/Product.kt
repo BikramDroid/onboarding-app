@@ -18,4 +18,18 @@ data class Product(
     val imgSrc: String
 ) {
     val priceKr: String by lazy { String.format("%.2f", price * 10) }
+
+    fun doesMatchSearchQuery(query: String): Boolean {
+        val matchingCombinations = listOf(
+            title,
+            category,
+            description,
+            "$id",
+            "$price",
+        )
+
+        return matchingCombinations.any {
+            it.contains(query, ignoreCase = true)
+        }
+    }
 }

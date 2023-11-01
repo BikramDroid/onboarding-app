@@ -34,6 +34,7 @@ import androidx.navigation.navArgument
 import com.bikram.onboardingapp.R
 import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
+import com.bikram.onboardingapp.ui.components.CustomSearchBar
 import com.bikram.onboardingapp.ui.components.CustomToast
 import com.bikram.onboardingapp.ui.components.WindowSize
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
@@ -46,6 +47,7 @@ enum class AppScreen(@StringRes val title: Int) {
     Start(title = R.string.app_name),
     AllProducts(title = R.string.all_products),
     ProductDetails(title = R.string.product_details),
+    ProductSearch(title = R.string.search_button),
 }
 
 @Composable
@@ -78,11 +80,13 @@ private fun MasterPageRegular(
     val appBarTitle = remember { mutableStateOf("") }
 
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val productsUiState by homeViewModel.productsUiState.collectAsState()
+
     val barcodeState by homeViewModel.scannerUiState.collectAsState()
 
     val barcode = barcodeState.barcodeDetails
     if (barcode.isNotEmpty()) {
-        barcodeState.barcodeDetails = ""
+        homeViewModel.clearBarcodeData()
         if (barcode == "Couldn't determine")
             CustomToast(
                 stringResource(id = R.string.not_found),
@@ -96,14 +100,15 @@ private fun MasterPageRegular(
 
     Scaffold(
         topBar = {
-            CustomAppBar(selectedIndex, appBarTitle.value,
-                canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = {
-                    navController.navigateUp()
-                },
-                searchButton = {
-                    homeViewModel.startScanning()
-                })
+            if (navController.currentBackStackEntry?.destination?.route != AppScreen.ProductSearch.name)
+                CustomAppBar(selectedIndex, appBarTitle.value,
+                    canNavigateBack = navController.previousBackStackEntry != null,
+                    navigateUp = {
+                        navController.navigateUp()
+                    },
+                    searchButton = {
+                        navController.navigate(AppScreen.ProductSearch.name)
+                    })
         },
         content = {
             NavHost(
@@ -115,8 +120,6 @@ private fun MasterPageRegular(
                         when (selectedIndex.value) {
                             0 -> {
                                 if (verifyAvailableNetwork()) {
-                                    val productsUiState by homeViewModel.productsUiState.collectAsState()
-
                                     HomeScreen(
                                         productsUiState,
                                         onMoreButtonClicked = {
@@ -158,7 +161,6 @@ private fun MasterPageRegular(
                             defaultValue = "Default"
                         }
                     )) {
-                    val productsUiState by homeViewModel.productsUiState.collectAsState()
                     val category = it.arguments?.getString("productsCategory")
 
                     if (category != null)
@@ -182,7 +184,6 @@ private fun MasterPageRegular(
                             defaultValue = 1
                         }
                     )) {
-                    val productsUiState by homeViewModel.productsUiState.collectAsState()
                     val productId = it.arguments?.getInt("productId")
 
                     if (productId != null)
@@ -191,6 +192,41 @@ private fun MasterPageRegular(
                                 navController.navigateUp()
                             }
                         )
+                }
+
+                composable(route = AppScreen.ProductSearch.name) {
+                    val searchText by homeViewModel.searchText.collectAsState()
+                    val products by homeViewModel.products.collectAsState()
+                    val isSearching by homeViewModel.isSearching.collectAsState()
+
+                    CustomSearchBar(
+                        scanButton = {
+                            navController.popBackStack()
+                            homeViewModel.startScanning()
+                        },
+                        onDismiss = {
+                            navController.navigateUp()
+                        },
+                        onCategoryButtonClicked = {
+                            navController.navigateUp()
+
+                            appBarTitle.value = it
+                            navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
+                        },
+                        onDetailsButtonClicked = {
+                            navController.navigateUp()
+
+                            appBarTitle.value = ""
+                            navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                        },
+                        onClearSearchText = {
+                            homeViewModel.clearSearchText()
+                        },
+                        onSearchTextChange = {
+                            homeViewModel.onSearchTextChange(it)
+                        },
+                        searchText, products, isSearching, productsUiState
+                    )
                 }
             }
         },

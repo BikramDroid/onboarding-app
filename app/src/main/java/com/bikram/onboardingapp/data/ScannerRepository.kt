@@ -36,7 +36,7 @@ class BarcodeScannerRepository @Inject constructor(
     }
 
     private fun getDetails(barcode: Barcode): String {
-        return if (barcode.displayValue!!.contains("SUPERMARKET-"))
+        return if (barcode.displayValue != null && barcode.displayValue?.contains("SUPERMARKET-") == true)
             barcode.displayValue!!.split("-")[1]
         else
             "Couldn't determine"
