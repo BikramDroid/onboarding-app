@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +25,7 @@ fun CustomAppBar(
     currentScreen: String,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
+    searchButton: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -37,6 +39,17 @@ fun CustomAppBar(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
+            }
+        },
+        actions = {
+            if (!canNavigateBack) {
+                IconButton(onClick = searchButton ) {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.search_button),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         },
         navigationIcon = {
