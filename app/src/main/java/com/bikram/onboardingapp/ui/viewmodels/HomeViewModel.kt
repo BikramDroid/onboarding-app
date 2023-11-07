@@ -29,8 +29,7 @@ import javax.inject.Inject
 data class ProductState(
     val products: List<Product> = emptyList(),
     val isLoading: Boolean = false,
-    val isError: Boolean = false,
-    val isRefreshing: Boolean = false
+    val isError: Boolean = false
 )
 
 /**
@@ -43,7 +42,7 @@ data class ScannerUiState(
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    productsRepository: ProductRepository,
+    private val productsRepository: ProductRepository,
     private val scannerRepo: ScannerRepository
 ) : ViewModel() {
 
@@ -54,14 +53,26 @@ class HomeViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     lateinit var searchedProducts: StateFlow<List<Product>>
 
     var productsState by mutableStateOf(ProductState())
 
     init {
+        fetchProducts()
+    }
+
+    fun fetchProducts(fetchFromServer: Boolean = false) {
         viewModelScope.launch {
+            _isRefreshing.emit(true)
+
             productsRepository
-                .getProducts(false, "")
+                .getProducts(fetchFromServer, "")
+                .onEach {
+                    _isRefreshing.emit(false)
+                }
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {

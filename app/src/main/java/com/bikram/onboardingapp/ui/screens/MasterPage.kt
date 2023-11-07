@@ -5,6 +5,9 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -60,6 +63,7 @@ fun MasterPage(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun MasterPageRegular(
@@ -81,8 +85,14 @@ private fun MasterPageRegular(
     val homeViewModel: HomeViewModel = hiltViewModel()
     val productsUiState = homeViewModel.productsState
 
-    val barcodeState by homeViewModel.scannerUiState.collectAsState()
+    val isPageRefreshing by homeViewModel.isRefreshing.collectAsState()
 
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isPageRefreshing,
+        onRefresh = { homeViewModel.fetchProducts(true) }
+    )
+
+    val barcodeState by homeViewModel.scannerUiState.collectAsState()
     val barcode = barcodeState.barcodeDetails
     if (barcode.isNotEmpty()) {
         homeViewModel.clearBarcodeData()
@@ -115,39 +125,51 @@ private fun MasterPageRegular(
                 startDestination = AppScreen.Start.name
             ) {
                 composable(route = AppScreen.Start.name) {
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        when (selectedIndex.value) {
-                            0 -> {
-                                if (productsUiState.isLoading)
-                                    LoadingScreen()
-                                else if (productsUiState.isError)
-                                    ErrorScreen()
-                                else
-                                //todo swipe refresh
-                                    HomeScreen(
-                                        productsUiState,
-                                        onMoreButtonClicked = {
-                                            appBarTitle.value = it
-                                            navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
-                                        },
-                                        onDetailsButtonClicked = {
-                                            if (isExpanded)
-                                                onExpandedItemClick(it)
-                                            else {
-                                                appBarTitle.value = ""
-                                                navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pullRefresh(pullRefreshState)
+                    ) {
+                        Box {
+                            when (selectedIndex.value) {
+                                0 -> {
+                                    if (productsUiState.isLoading)
+                                        LoadingScreen()
+                                    else if (productsUiState.isError)
+                                        ErrorScreen()
+                                    else
+                                        HomeScreen(
+                                            productsUiState,
+                                            onMoreButtonClicked = {
+                                                appBarTitle.value = it
+                                                navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
+                                            },
+                                            onDetailsButtonClicked = {
+                                                if (isExpanded)
+                                                    onExpandedItemClick(it)
+                                                else {
+                                                    appBarTitle.value = ""
+                                                    navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                                                }
                                             }
-                                        }
-                                    )
+                                        )
+                                }
+
+                                1 -> {
+                                    ReceiptsScreen()
+                                }
+
+                                2 -> {
+                                    ProfileScreen()
+                                }
                             }
 
-                            1 -> {
-                                ReceiptsScreen()
-                            }
-
-                            2 -> {
-                                ProfileScreen()
-                            }
+                            PullRefreshIndicator(
+                                refreshing = isPageRefreshing,
+                                state = pullRefreshState,
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                contentColor = MaterialTheme.colorScheme.primary,
+                            )
                         }
                     }
                 }
