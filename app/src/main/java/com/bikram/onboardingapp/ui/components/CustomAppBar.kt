@@ -16,7 +16,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.bikram.onboardingapp.R
-import com.bikram.onboardingapp.model.NavItems
+import com.bikram.onboardingapp.domain.model.NavItems
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

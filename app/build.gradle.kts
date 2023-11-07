@@ -82,6 +82,11 @@ dependencies {
     // Barcode Scanner
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
 
+    // Room
+    implementation("androidx.room:room-ktx:2.4.2")
+    implementation("androidx.room:room-runtime:2.4.2")
+    kapt("androidx.room:room-compiler:2.4.2")
+
     //Others
     implementation("io.github.pushpalroy:jetlime:1.0.3")
 

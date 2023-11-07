@@ -1,8 +1,6 @@
 package com.bikram.onboardingapp.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.net.ConnectivityManager
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -36,9 +34,10 @@ import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
 import com.bikram.onboardingapp.ui.components.CustomSearchBar
 import com.bikram.onboardingapp.ui.components.CustomToast
+import com.bikram.onboardingapp.ui.components.ErrorScreen
+import com.bikram.onboardingapp.ui.components.LoadingScreen
 import com.bikram.onboardingapp.ui.components.WindowSize
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 
 /**
  * enum values that represent the screens in the app
@@ -80,7 +79,7 @@ private fun MasterPageRegular(
     val appBarTitle = remember { mutableStateOf("") }
 
     val homeViewModel: HomeViewModel = hiltViewModel()
-    val productsUiState by homeViewModel.productsUiState.collectAsState()
+    val productsUiState = homeViewModel.productsState
 
     val barcodeState by homeViewModel.scannerUiState.collectAsState()
 
@@ -119,7 +118,12 @@ private fun MasterPageRegular(
                     Surface(modifier = Modifier.fillMaxSize()) {
                         when (selectedIndex.value) {
                             0 -> {
-                                if (verifyAvailableNetwork()) {
+                                if (productsUiState.isLoading)
+                                    LoadingScreen()
+                                else if (productsUiState.isError)
+                                    ErrorScreen()
+                                else
+                                //todo swipe refresh
                                     HomeScreen(
                                         productsUiState,
                                         onMoreButtonClicked = {
@@ -135,12 +139,6 @@ private fun MasterPageRegular(
                                             }
                                         }
                                     )
-                                } else {
-                                    HomeScreen(
-                                        ProductsUiState.Error,
-                                        onMoreButtonClicked = { },
-                                        onDetailsButtonClicked = { })
-                                }
                             }
 
                             1 -> {
@@ -165,16 +163,16 @@ private fun MasterPageRegular(
 
                     if (category != null)
                         AllProductsScreen(
-                            productsUiState,
-                            category,
-                            onDetailsButtonClicked = {
-                                if (isExpanded)
-                                    onExpandedItemClick(it)
-                                else {
-                                    appBarTitle.value = ""
-                                    navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
-                                }
-                            })
+                            productsUiState.products,
+                            category
+                        ) {
+                            if (isExpanded)
+                                onExpandedItemClick(it)
+                            else {
+                                appBarTitle.value = ""
+                                navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                            }
+                        }
                 }
 
                 composable(route = AppScreen.ProductDetails.name + "?productId={productId}",
@@ -196,8 +194,8 @@ private fun MasterPageRegular(
 
                 composable(route = AppScreen.ProductSearch.name) {
                     val searchText by homeViewModel.searchText.collectAsState()
-                    val products by homeViewModel.products.collectAsState()
                     val isSearching by homeViewModel.isSearching.collectAsState()
+                    val searchedProducts = homeViewModel.searchedProducts.collectAsState().value
 
                     CustomSearchBar(
                         scanButton = {
@@ -225,7 +223,7 @@ private fun MasterPageRegular(
                         onSearchTextChange = {
                             homeViewModel.onSearchTextChange(it)
                         },
-                        searchText, products, isSearching, productsUiState
+                        searchText, searchedProducts, isSearching, productsUiState.products
                     )
                 }
             }
@@ -258,7 +256,7 @@ private fun MasterPageExpanded(
         Spacer(modifier = Modifier.width(hingeHalfSize * 2))
 
         val homeViewModel: HomeViewModel = hiltViewModel()
-        val productsUiState by homeViewModel.productsUiState.collectAsState()
+        val productsUiState = homeViewModel.productsState
 
         if (selectedProductId == 0)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -272,13 +270,4 @@ private fun MasterPageExpanded(
         else
             ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {})
     }
-}
-
-@Suppress("DEPRECATION")
-@Composable
-fun verifyAvailableNetwork(): Boolean {
-    val connectivityManager =
-        LocalContext.current.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkInfo = connectivityManager.activeNetworkInfo
-    return networkInfo != null && networkInfo.isConnected
 }

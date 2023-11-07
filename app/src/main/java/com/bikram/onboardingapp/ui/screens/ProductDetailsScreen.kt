@@ -13,42 +13,38 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
-import com.bikram.onboardingapp.model.Product
+import com.bikram.onboardingapp.domain.model.Product
 import com.bikram.onboardingapp.ui.components.CustomSpacer
 import com.bikram.onboardingapp.ui.components.CustomToast
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
+import com.bikram.onboardingapp.ui.viewmodels.ProductState
 
 @Composable
 fun ProductDetailsScreen(
-    productsUiState: ProductsUiState,
+    productsUiState: ProductState,
     productId: Int,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    when (productsUiState) {
-        is ProductsUiState.Success ->
-            if (productId > productsUiState.products.size) {
-                CustomToast(stringResource(id = R.string.not_found), LocalContext.current)
-                onDismiss()
-            } else {
-                DetailsScreenContent(
-                    product = productsUiState.products[productId - 1],
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-        else -> {}
+    if (productId > productsUiState.products.size) {
+        CustomToast(stringResource(id = R.string.not_found), LocalContext.current)
+        onDismiss()
+    } else {
+        DetailsScreenContent(
+            product = productsUiState.products[productId - 1],
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
 @Composable
 fun DetailsScreenContent(
     product: Product,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column {
         Box(
@@ -59,16 +55,16 @@ fun DetailsScreenContent(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(product.imgSrc)
+                    .data(product.image)
                     .crossfade(true)
                     .build(),
                 modifier = modifier
                     .fillMaxWidth()
                     .height(250.dp)
                     .align(Alignment.Center),
-                error = painterResource(com.bikram.onboardingapp.R.drawable.loading_img),
-                placeholder = painterResource(com.bikram.onboardingapp.R.drawable.loading_img),
-                contentDescription = stringResource(com.bikram.onboardingapp.R.string.product_image),
+                error = painterResource(R.drawable.loading_img),
+                placeholder = painterResource(R.drawable.loading_img),
+                contentDescription = stringResource(R.string.product_image),
                 contentScale = ContentScale.Inside
             )
         }
@@ -117,4 +113,10 @@ fun DetailsScreenContent(
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun ProductDetailsScreenPreview() {
+    ProductDetailsScreen(ProductState(), productId = 0, onDismiss = {})
 }
