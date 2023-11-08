@@ -1,8 +1,10 @@
 package com.bikram.onboardingapp.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +30,8 @@ import com.bikram.onboardingapp.ui.viewmodels.ProductState
 fun ProductDetailsScreen(
     productsUiState: ProductState,
     productId: Int,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onARView: () -> Unit
 ) {
     if (productId > productsUiState.products.size) {
         CustomToast(stringResource(id = R.string.not_found), LocalContext.current)
@@ -36,7 +39,8 @@ fun ProductDetailsScreen(
     } else {
         DetailsScreenContent(
             product = productsUiState.products[productId - 1],
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onARView
         )
     }
 }
@@ -44,7 +48,8 @@ fun ProductDetailsScreen(
 @Composable
 fun DetailsScreenContent(
     product: Product,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onARView: () -> Unit
 ) {
     Column {
         Box(
@@ -67,7 +72,19 @@ fun DetailsScreenContent(
                 contentDescription = stringResource(R.string.product_image),
                 contentScale = ContentScale.Inside
             )
+
+            Icon(
+                painter = painterResource(id = R.drawable.view_ar),
+                contentDescription = null, tint = Color.Black,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 10.dp)
+                    .clickable {
+                        onARView()
+                    }
+            )
         }
+
         CustomSpacer()
         Card(
             modifier = modifier
@@ -118,5 +135,5 @@ fun DetailsScreenContent(
 @Preview(showSystemUi = true)
 @Composable
 fun ProductDetailsScreenPreview() {
-    ProductDetailsScreen(ProductState(), productId = 0, onDismiss = {})
+    ProductDetailsScreen(ProductState(), productId = 0, onDismiss = {}, onARView = {})
 }

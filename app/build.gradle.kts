@@ -88,6 +88,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.4.2")
     kapt("androidx.room:room-compiler:2.4.2")
 
+    // AR
+    implementation ("io.github.sceneview:arsceneview:1.2.2")
+
     //Others
     implementation("io.github.pushpalroy:jetlime:1.0.3")
 

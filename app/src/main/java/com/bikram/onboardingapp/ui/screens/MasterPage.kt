@@ -1,6 +1,8 @@
 package com.bikram.onboardingapp.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -33,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bikram.onboardingapp.R
+import com.bikram.onboardingapp.ui.components.ARSample
 import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
 import com.bikram.onboardingapp.ui.components.CustomSearchBar
@@ -42,6 +45,7 @@ import com.bikram.onboardingapp.ui.components.LoadingScreen
 import com.bikram.onboardingapp.ui.components.WindowSize
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
 
+
 /**
  * enum values that represent the screens in the app
  */
@@ -50,6 +54,7 @@ enum class AppScreen(@StringRes val title: Int) {
     AllProducts(title = R.string.all_products),
     ProductDetails(title = R.string.product_details),
     ProductSearch(title = R.string.search_button),
+    ProductAR(title = R.string.a_r)
 }
 
 @Composable
@@ -92,6 +97,8 @@ private fun MasterPageRegular(
         onRefresh = { homeViewModel.fetchProducts(true) }
     )
 
+    val context = LocalContext.current
+
     val barcodeState by homeViewModel.scannerUiState.collectAsState()
     val barcode = barcodeState.barcodeDetails
     if (barcode.isNotEmpty()) {
@@ -99,7 +106,7 @@ private fun MasterPageRegular(
         if (barcode == "Couldn't determine")
             CustomToast(
                 stringResource(id = R.string.not_found),
-                LocalContext.current
+                context
             )
         else {
             appBarTitle.value = ""
@@ -109,7 +116,9 @@ private fun MasterPageRegular(
 
     Scaffold(
         topBar = {
-            if (navController.currentBackStackEntry?.destination?.route != AppScreen.ProductSearch.name)
+            if (navController.currentBackStackEntry?.destination?.route != AppScreen.ProductSearch.name
+                && navController.currentBackStackEntry?.destination?.route != AppScreen.ProductAR.name
+            )
                 CustomAppBar(selectedIndex, appBarTitle.value,
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = {
@@ -210,8 +219,22 @@ private fun MasterPageRegular(
                         ProductDetailsScreen(productsUiState, productId,
                             onDismiss = {
                                 navController.navigateUp()
+                            },
+                            onARView = {
+                                //Launch via intent or a local file with custom UI
+//                                navController.navigate(AppScreen.ProductAR.name)
+
+                                val sceneViewerIntent = Intent(Intent.ACTION_VIEW)
+                                sceneViewerIntent.data =
+                                    Uri.parse("https://arvr.google.com/scene-viewer/1.0?file=https://ep.charpstar.net/Android/202090.glb&mode=ar_preferred&resizable=false&disable_occlusion=true")
+                                sceneViewerIntent.setPackage("com.google.android.googlequicksearchbox")
+                                context.startActivity(sceneViewerIntent)
                             }
                         )
+                }
+
+                composable(route = AppScreen.ProductAR.name) {
+                    ARSample()
                 }
 
                 composable(route = AppScreen.ProductSearch.name) {
@@ -290,6 +313,6 @@ private fun MasterPageExpanded(
                 )
             }
         else
-            ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {})
+            ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {}, onARView = {})
     }
 }
