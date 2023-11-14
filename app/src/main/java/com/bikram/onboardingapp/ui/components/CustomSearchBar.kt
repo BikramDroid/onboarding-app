@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -55,6 +56,7 @@ import com.bikram.onboardingapp.domain.model.Product
 fun CustomSearchBar(
     scanButton: () -> Unit,
     onDismiss: () -> Unit,
+    lensButton: () -> Unit,
     onCategoryButtonClicked: (String) -> Unit,
     onDetailsButtonClicked: (Int) -> Unit,
     onClearSearchText: () -> Unit,
@@ -106,13 +108,25 @@ fun CustomSearchBar(
             },
             trailingIcon = {
                 if (searchText.isEmpty())
-                    Icon(
-                        painter = painterResource(id = R.drawable.barcode_scanner),
-                        contentDescription = null, tint = Color.Black,
-                        modifier = Modifier.clickable {
-                            scanButton()
-                        }
-                    )
+                    Row {
+                        Icon(
+                            painter = painterResource(id = R.drawable.barcode_scanner),
+                            contentDescription = null, tint = Color.Black,
+                            modifier = Modifier.clickable {
+                                scanButton()
+                            }
+                        )
+
+                        Icon(
+                            painter = painterResource(id = R.drawable.lens),
+                            contentDescription = null, tint = Color.Black,
+                            modifier = Modifier
+                                .padding(start = 5.dp, end = 5.dp)
+                                .clickable {
+                                    lensButton()
+                                }
+                        )
+                    }
                 else
                     Icon(
                         Icons.Rounded.Close,
@@ -269,4 +283,19 @@ private fun DefaultScreen(
 //                    )
 //                }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun CustomSearchBarPreview() {
+    CustomSearchBar(
+        scanButton = {},
+        onDismiss = {},
+        lensButton = {},
+        onCategoryButtonClicked = {},
+        onDetailsButtonClicked = {},
+        onClearSearchText = {},
+        onSearchTextChange = {},
+        "", emptyList(), false, emptyList()
+    )
 }

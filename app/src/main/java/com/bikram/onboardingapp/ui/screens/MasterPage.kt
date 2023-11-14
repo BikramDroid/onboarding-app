@@ -54,7 +54,8 @@ enum class AppScreen(@StringRes val title: Int) {
     AllProducts(title = R.string.all_products),
     ProductDetails(title = R.string.product_details),
     ProductSearch(title = R.string.search_button),
-    ProductAR(title = R.string.a_r)
+    ProductAR(title = R.string.a_r),
+    ProductDetection(title = R.string.obj_detection)
 }
 
 @Composable
@@ -118,6 +119,7 @@ private fun MasterPageRegular(
         topBar = {
             if (navController.currentBackStackEntry?.destination?.route != AppScreen.ProductSearch.name
                 && navController.currentBackStackEntry?.destination?.route != AppScreen.ProductAR.name
+                && navController.currentBackStackEntry?.destination?.route != AppScreen.ProductDetection.name
             )
                 CustomAppBar(selectedIndex, appBarTitle.value,
                     canNavigateBack = navController.previousBackStackEntry != null,
@@ -237,6 +239,10 @@ private fun MasterPageRegular(
                     ARSample()
                 }
 
+                composable(route = AppScreen.ProductDetection.name) {
+                    ObjectDetectionScreen(productsUiState.products)
+                }
+
                 composable(route = AppScreen.ProductSearch.name) {
                     val searchText by homeViewModel.searchText.collectAsState()
                     val isSearching by homeViewModel.isSearching.collectAsState()
@@ -249,6 +255,10 @@ private fun MasterPageRegular(
                         },
                         onDismiss = {
                             navController.navigateUp()
+                        },
+                        lensButton = {
+                            navController.popBackStack()
+                            navController.navigate(AppScreen.ProductDetection.name)
                         },
                         onCategoryButtonClicked = {
                             navController.navigateUp()

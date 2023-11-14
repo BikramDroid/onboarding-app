@@ -89,7 +89,18 @@ dependencies {
     kapt("androidx.room:room-compiler:2.4.2")
 
     // AR
-    implementation ("io.github.sceneview:arsceneview:1.2.2")
+    implementation("io.github.sceneview:arsceneview:1.2.2")
+
+    // ML Kit
+    implementation("com.google.mlkit:image-labeling:17.0.7")
+
+    // CameraX
+    implementation("androidx.camera:camera-camera2:1.3.0-alpha06")
+    implementation("androidx.camera:camera-lifecycle:1.3.0-alpha06")
+    implementation("androidx.camera:camera-view:1.3.0-alpha06")
+
+    // Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.19.0")
 
     //Others
     implementation("io.github.pushpalroy:jetlime:1.0.3")
