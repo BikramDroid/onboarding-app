@@ -1,10 +1,14 @@
 package com.bikram.onboardingapp.ui.viewmodels
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bikram.onboardingapp.data.ProductsRepository
-import com.bikram.onboardingapp.data.ScannerRepository
-import com.bikram.onboardingapp.model.Product
+import com.bikram.onboardingapp.domain.model.Product
+import com.bikram.onboardingapp.domain.repository.ProductRepository
+import com.bikram.onboardingapp.domain.repository.ScannerRepository
+import com.bikram.onboardingapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -23,11 +26,11 @@ import javax.inject.Inject
 /**
  * UI state for the Home screen
  */
-sealed interface ProductsUiState {
-    data class Success(val products: List<Product>) : ProductsUiState
-    object Error : ProductsUiState
-    object Loading : ProductsUiState
-}
+data class ProductState(
+    val products: List<Product> = emptyList(),
+    val isLoading: Boolean = false,
+    val isError: Boolean = false
+)
 
 /**
  * UI state for the scanner
@@ -39,10 +42,9 @@ data class ScannerUiState(
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    productsRepository: ProductsRepository,
+    private val productsRepository: ProductRepository,
     private val scannerRepo: ScannerRepository
 ) : ViewModel() {
-    val productsUiState: StateFlow<ProductsUiState>
 
     // Search products area
     private val _searchText = MutableStateFlow("")
@@ -51,42 +53,71 @@ class HomeViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
-    lateinit var products: StateFlow<List<Product>>
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    lateinit var searchedProducts: StateFlow<List<Product>>
+
+    var productsState by mutableStateOf(ProductState())
 
     init {
-        productsUiState = productsRepository.getProductsList().map {
-            try {
-                val _products = MutableStateFlow(it)
+        fetchProducts()
+    }
 
-                products = searchText
-                    .debounce(500L)
-                    .onEach { _isSearching.update { true } }
-                    .combine(_products) { text, products ->
-                        if (text.isBlank()) {
-                            emptyList()
-                        } else {
-                            //delay(500L)
-                            products.filter {
-                                it.doesMatchSearchQuery(text)
+    fun fetchProducts(fetchFromServer: Boolean = false) {
+        viewModelScope.launch {
+            _isRefreshing.emit(true)
+
+            productsRepository
+                .getProducts(fetchFromServer, "")
+                .onEach {
+                    _isRefreshing.emit(false)
+                }
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let { products ->
+                                productsState = productsState.copy(
+                                    products = products
+                                )
+
+                                val _products = MutableStateFlow(products)
+                                setupSearch(_products)
                             }
                         }
-                    }
-                    .onEach { _isSearching.update { false } }
-                    .stateIn(
-                        viewModelScope,
-                        SharingStarted.WhileSubscribed(5000),
-                        _products.value
-                    )
 
-                ProductsUiState.Success(it)
-            } catch (e: Exception) {
-                ProductsUiState.Error
+                        is Resource.Error -> {
+                            productsState = productsState.copy(isLoading = false, isError = true)
+                        }
+
+                        is Resource.Loading -> {
+                            productsState = productsState.copy(isLoading = result.isLoading)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun setupSearch(_products: MutableStateFlow<List<Product>>) {
+        searchedProducts = searchText
+            .debounce(500L)
+            .onEach { _isSearching.update { true } }
+            .combine(_products) { text, products ->
+                if (text.isBlank()) {
+                    emptyList()
+                } else {
+                    //delay(500L)
+                    products.filter {
+                        it.doesMatchSearchQuery(text)
+                    }
+                }
             }
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            ProductsUiState.Loading
-        )
+            .onEach { _isSearching.update { false } }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                _products.value
+            )
     }
 
     fun onSearchTextChange(text: String) {

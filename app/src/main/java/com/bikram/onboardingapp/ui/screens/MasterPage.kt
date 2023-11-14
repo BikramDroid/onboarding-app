@@ -1,12 +1,13 @@
 package com.bikram.onboardingapp.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.net.ConnectivityManager
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -36,9 +37,10 @@ import com.bikram.onboardingapp.ui.components.CustomAppBar
 import com.bikram.onboardingapp.ui.components.CustomBottomBar
 import com.bikram.onboardingapp.ui.components.CustomSearchBar
 import com.bikram.onboardingapp.ui.components.CustomToast
+import com.bikram.onboardingapp.ui.components.ErrorScreen
+import com.bikram.onboardingapp.ui.components.LoadingScreen
 import com.bikram.onboardingapp.ui.components.WindowSize
 import com.bikram.onboardingapp.ui.viewmodels.HomeViewModel
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 
 /**
  * enum values that represent the screens in the app
@@ -61,6 +63,7 @@ fun MasterPage(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun MasterPageRegular(
@@ -80,10 +83,16 @@ private fun MasterPageRegular(
     val appBarTitle = remember { mutableStateOf("") }
 
     val homeViewModel: HomeViewModel = hiltViewModel()
-    val productsUiState by homeViewModel.productsUiState.collectAsState()
+    val productsUiState = homeViewModel.productsState
+
+    val isPageRefreshing by homeViewModel.isRefreshing.collectAsState()
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isPageRefreshing,
+        onRefresh = { homeViewModel.fetchProducts(true) }
+    )
 
     val barcodeState by homeViewModel.scannerUiState.collectAsState()
-
     val barcode = barcodeState.barcodeDetails
     if (barcode.isNotEmpty()) {
         homeViewModel.clearBarcodeData()
@@ -116,40 +125,51 @@ private fun MasterPageRegular(
                 startDestination = AppScreen.Start.name
             ) {
                 composable(route = AppScreen.Start.name) {
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        when (selectedIndex.value) {
-                            0 -> {
-                                if (verifyAvailableNetwork()) {
-                                    HomeScreen(
-                                        productsUiState,
-                                        onMoreButtonClicked = {
-                                            appBarTitle.value = it
-                                            navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
-                                        },
-                                        onDetailsButtonClicked = {
-                                            if (isExpanded)
-                                                onExpandedItemClick(it)
-                                            else {
-                                                appBarTitle.value = ""
-                                                navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pullRefresh(pullRefreshState)
+                    ) {
+                        Box {
+                            when (selectedIndex.value) {
+                                0 -> {
+                                    if (productsUiState.isLoading)
+                                        LoadingScreen()
+                                    else if (productsUiState.isError)
+                                        ErrorScreen()
+                                    else
+                                        HomeScreen(
+                                            productsUiState,
+                                            onMoreButtonClicked = {
+                                                appBarTitle.value = it
+                                                navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
+                                            },
+                                            onDetailsButtonClicked = {
+                                                if (isExpanded)
+                                                    onExpandedItemClick(it)
+                                                else {
+                                                    appBarTitle.value = ""
+                                                    navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                                                }
                                             }
-                                        }
-                                    )
-                                } else {
-                                    HomeScreen(
-                                        ProductsUiState.Error,
-                                        onMoreButtonClicked = { },
-                                        onDetailsButtonClicked = { })
+                                        )
+                                }
+
+                                1 -> {
+                                    ReceiptsScreen()
+                                }
+
+                                2 -> {
+                                    ProfileScreen()
                                 }
                             }
 
-                            1 -> {
-                                ReceiptsScreen()
-                            }
-
-                            2 -> {
-                                ProfileScreen()
-                            }
+                            PullRefreshIndicator(
+                                refreshing = isPageRefreshing,
+                                state = pullRefreshState,
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                contentColor = MaterialTheme.colorScheme.primary,
+                            )
                         }
                     }
                 }
@@ -165,16 +185,16 @@ private fun MasterPageRegular(
 
                     if (category != null)
                         AllProductsScreen(
-                            productsUiState,
-                            category,
-                            onDetailsButtonClicked = {
-                                if (isExpanded)
-                                    onExpandedItemClick(it)
-                                else {
-                                    appBarTitle.value = ""
-                                    navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
-                                }
-                            })
+                            productsUiState.products,
+                            category
+                        ) {
+                            if (isExpanded)
+                                onExpandedItemClick(it)
+                            else {
+                                appBarTitle.value = ""
+                                navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                            }
+                        }
                 }
 
                 composable(route = AppScreen.ProductDetails.name + "?productId={productId}",
@@ -196,8 +216,8 @@ private fun MasterPageRegular(
 
                 composable(route = AppScreen.ProductSearch.name) {
                     val searchText by homeViewModel.searchText.collectAsState()
-                    val products by homeViewModel.products.collectAsState()
                     val isSearching by homeViewModel.isSearching.collectAsState()
+                    val searchedProducts = homeViewModel.searchedProducts.collectAsState().value
 
                     CustomSearchBar(
                         scanButton = {
@@ -225,7 +245,7 @@ private fun MasterPageRegular(
                         onSearchTextChange = {
                             homeViewModel.onSearchTextChange(it)
                         },
-                        searchText, products, isSearching, productsUiState
+                        searchText, searchedProducts, isSearching, productsUiState.products
                     )
                 }
             }
@@ -258,7 +278,7 @@ private fun MasterPageExpanded(
         Spacer(modifier = Modifier.width(hingeHalfSize * 2))
 
         val homeViewModel: HomeViewModel = hiltViewModel()
-        val productsUiState by homeViewModel.productsUiState.collectAsState()
+        val productsUiState = homeViewModel.productsState
 
         if (selectedProductId == 0)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -272,13 +292,4 @@ private fun MasterPageExpanded(
         else
             ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {})
     }
-}
-
-@Suppress("DEPRECATION")
-@Composable
-fun verifyAvailableNetwork(): Boolean {
-    val connectivityManager =
-        LocalContext.current.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkInfo = connectivityManager.activeNetworkInfo
-    return networkInfo != null && networkInfo.isConnected
 }

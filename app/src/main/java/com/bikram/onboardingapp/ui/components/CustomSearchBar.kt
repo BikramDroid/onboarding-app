@@ -48,8 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
-import com.bikram.onboardingapp.model.Product
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
+import com.bikram.onboardingapp.domain.model.Product
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -63,7 +62,7 @@ fun CustomSearchBar(
     searchText: String,
     products: List<Product>,
     isSearching: Boolean,
-    productsUiState: ProductsUiState
+    productsUiState: List<Product>
 ) {
     var active by rememberSaveable { mutableStateOf(true) }
     val searchHistory = remember { mutableStateListOf("") }
@@ -127,17 +126,11 @@ fun CustomSearchBar(
             },
         ) {
             if (searchText.isEmpty() || isSearching) {
-                when (productsUiState) {
-                    is ProductsUiState.Success -> {
-                        DefaultScreen(
-                            onCategoryButtonClicked,
-                            onDetailsButtonClicked,
-                            productsUiState.products.shuffled().take(3)
-                        )
-                    }
-
-                    else -> {}
-                }
+                DefaultScreen(
+                    onCategoryButtonClicked,
+                    onDetailsButtonClicked,
+                    productsUiState.shuffled().take(3)
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -234,7 +227,7 @@ private fun DefaultScreen(
                 leadingContent = {
                     AsyncImage(
                         model = ImageRequest.Builder(context = LocalContext.current)
-                            .data(products[product].imgSrc)
+                            .data(products[product].image)
                             .crossfade(true)
                             .build(),
                         modifier = Modifier

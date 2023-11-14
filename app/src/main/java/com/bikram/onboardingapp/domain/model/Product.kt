@@ -1,6 +1,5 @@
-package com.bikram.onboardingapp.model
+package com.bikram.onboardingapp.domain.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,8 +13,7 @@ data class Product(
     val title: String,
     val description: String,
     val category: String,
-    @SerialName(value = "image")
-    val imgSrc: String
+    val image: String
 ) {
     val priceKr: String by lazy { String.format("%.2f", price * 10) }
 

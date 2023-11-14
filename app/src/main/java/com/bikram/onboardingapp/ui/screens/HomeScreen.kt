@@ -49,26 +49,19 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
-import com.bikram.onboardingapp.model.Product
+import com.bikram.onboardingapp.domain.model.Product
 import com.bikram.onboardingapp.ui.components.CustomSpacer
-import com.bikram.onboardingapp.ui.components.ErrorScreen
-import com.bikram.onboardingapp.ui.components.LoadingScreen
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
+import com.bikram.onboardingapp.ui.viewmodels.ProductState
 
 @Composable
 fun HomeScreen(
-    productsUiState: Any,
+    productsUiState: ProductState,
     onMoreButtonClicked: (String) -> Unit,
     onDetailsButtonClicked: (Int) -> Unit
 ) {
-    when (productsUiState) {
-        is ProductsUiState.Loading -> LoadingScreen()
-        is ProductsUiState.Success -> ResultScreen(
-            productsUiState.products, onMoreButtonClicked, onDetailsButtonClicked
-        )
-
-        is ProductsUiState.Error -> ErrorScreen()
-    }
+    ResultScreen(
+        productsUiState.products, onMoreButtonClicked, onDetailsButtonClicked
+    )
 }
 
 //ResultScreen displaying the products retrieved.
@@ -212,7 +205,7 @@ private fun ProductsCard(
                     ) {
                         AsyncImage(
                             model = ImageRequest.Builder(context = LocalContext.current)
-                                .data(product.imgSrc)
+                                .data(product.image)
                                 .crossfade(true)
                                 .build(),
                             error = painterResource(R.drawable.loading_img),
@@ -348,5 +341,5 @@ private fun getRandomBanner(): Int {
 @Preview(showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(ProductsUiState.Loading, onMoreButtonClicked = {}, onDetailsButtonClicked = {})
+    HomeScreen(ProductState(), onMoreButtonClicked = {}, onDetailsButtonClicked = {})
 }

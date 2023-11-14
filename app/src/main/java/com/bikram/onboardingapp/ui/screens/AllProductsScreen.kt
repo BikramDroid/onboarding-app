@@ -35,16 +35,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
-import com.bikram.onboardingapp.model.Product
+import com.bikram.onboardingapp.domain.model.Product
 import com.bikram.onboardingapp.ui.components.CustomSpacer
-import com.bikram.onboardingapp.ui.components.ErrorScreen
 import com.bikram.onboardingapp.ui.components.LoadingScreen
-import com.bikram.onboardingapp.ui.viewmodels.ProductsUiState
 import kotlinx.coroutines.delay
 
 @Composable
 fun AllProductsScreen(
-    productsUiState: ProductsUiState,
+    productsUiState: List<Product>,
     productsCategory: String,
     onDetailsButtonClicked: (Int) -> Unit
 ) {
@@ -58,14 +56,9 @@ fun AllProductsScreen(
     if (show)
         LoadingScreen()
     else
-        when (productsUiState) {
-            is ProductsUiState.Loading -> LoadingScreen()
-            is ProductsUiState.Success -> ProductsColumn(
-                productsUiState.products, productsCategory, onDetailsButtonClicked
-            )
-
-            is ProductsUiState.Error -> ErrorScreen()
-        }
+        ProductsColumn(
+            productsUiState, productsCategory, onDetailsButtonClicked
+        )
 }
 
 @Composable
@@ -124,7 +117,7 @@ fun ProductItem(
         Row {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(product.imgSrc)
+                    .data(product.image)
                     .crossfade(true)
                     .build(),
                 modifier = Modifier
@@ -166,5 +159,5 @@ fun ProductItem(
 @Preview(showSystemUi = true)
 @Composable
 fun AllProductsScreenPreview() {
-    AllProductsScreen(ProductsUiState.Loading, "", onDetailsButtonClicked = { })
+    AllProductsScreen(emptyList(), productsCategory = "", onDetailsButtonClicked = {})
 }

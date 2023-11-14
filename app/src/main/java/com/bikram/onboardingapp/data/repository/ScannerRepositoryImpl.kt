@@ -1,5 +1,6 @@
-package com.bikram.onboardingapp.data
+package com.bikram.onboardingapp.data.repository
 
+import com.bikram.onboardingapp.domain.repository.ScannerRepository
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import kotlinx.coroutines.channels.awaitClose
@@ -9,16 +10,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Repository that fetch barcode data from google scanner module.
- */
-interface ScannerRepository {
-    fun startScanning(): Flow<String?>
-}
-
-/**
  * Implementation of Repository that produces barcode data.
  */
-class BarcodeScannerRepository @Inject constructor(
+class ScannerRepositoryImpl @Inject constructor(
     private val scanner: GmsBarcodeScanner
 ) : ScannerRepository {
     override fun startScanning(): Flow<String?> {

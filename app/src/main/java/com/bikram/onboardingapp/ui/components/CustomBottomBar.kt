@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.bikram.onboardingapp.model.NavItems
+import com.bikram.onboardingapp.domain.model.NavItems
 
 @Composable
 fun CustomBottomBar(selectedIndex: MutableState<Int>) {
