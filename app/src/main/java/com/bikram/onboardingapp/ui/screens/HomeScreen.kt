@@ -164,7 +164,7 @@ private fun ProductsRow(
 }
 
 @Composable
-private fun ProductsCard(
+fun ProductsCard(
     products: List<Product>,
     reversed: Boolean,
     onDetailsButtonClicked: (Int) -> Unit

@@ -231,6 +231,18 @@ private fun MasterPageRegular(
                                     Uri.parse("https://arvr.google.com/scene-viewer/1.0?file=https://ep.charpstar.net/Android/202090.glb&mode=ar_preferred&resizable=false&disable_occlusion=true")
                                 sceneViewerIntent.setPackage("com.google.android.googlequicksearchbox")
                                 context.startActivity(sceneViewerIntent)
+                            },
+                            onMoreButtonClicked = {
+                                appBarTitle.value = it
+                                navController.navigate(AppScreen.AllProducts.name + "?productsCategory=" + it)
+                            },
+                            onDetailsButtonClicked = {
+                                if (isExpanded)
+                                    onExpandedItemClick(it)
+                                else {
+                                    appBarTitle.value = ""
+                                    navController.navigate(AppScreen.ProductDetails.name + "?productId=" + it)
+                                }
                             }
                         )
                 }
@@ -323,6 +335,12 @@ private fun MasterPageExpanded(
                 )
             }
         else
-            ProductDetailsScreen(productsUiState, selectedProductId, onDismiss = {}, onARView = {})
+            ProductDetailsScreen(
+                productsUiState,
+                selectedProductId,
+                onDismiss = {},
+                onARView = {},
+                onMoreButtonClicked = {},
+                onDetailsButtonClicked = {})
     }
 }
