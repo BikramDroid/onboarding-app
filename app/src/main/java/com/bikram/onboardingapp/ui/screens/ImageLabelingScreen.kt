@@ -13,36 +13,14 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import com.bikram.onboardingapp.domain.model.Product
 import com.bikram.onboardingapp.ui.components.CameraView
-import com.bikram.onboardingapp.ui.components.CustomToast
 import com.bikram.onboardingapp.ui.components.ObjectAnalyzer
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionRequired
-import com.google.accompanist.permissions.rememberPermissionState
 import com.google.mlkit.vision.label.ImageLabel
 
 var isCardVisible = false
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ObjectDetectionScreen(productsUiState: List<Product>) {
-    val context = LocalContext.current
-    val cameraPermissionState =
-        rememberPermissionState(permission = android.Manifest.permission.CAMERA)
-
-    PermissionRequired(
-        permissionState = cameraPermissionState,
-        permissionNotGrantedContent = {
-            LaunchedEffect(Unit) {
-                cameraPermissionState.launchPermissionRequest()
-            }
-        },
-        permissionNotAvailableContent = {
-            Column {
-                CustomToast("Permission denied.", context)
-            }
-        }) {
         ScanSurface(productsUiState)
-    }
 }
 
 @Composable

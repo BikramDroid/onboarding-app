@@ -1,5 +1,6 @@
 package com.bikram.onboardingapp.ui.components
 
+import android.Manifest
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,9 +51,17 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bikram.onboardingapp.R
 import com.bikram.onboardingapp.domain.model.Product
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalComposeUiApi::class,
+    ExperimentalPermissionsApi::class
+)
 fun CustomSearchBar(
     scanButton: () -> Unit,
     onDismiss: () -> Unit,
@@ -71,6 +80,17 @@ fun CustomSearchBar(
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val context = LocalContext.current
+    val cameraPermissionState =
+        rememberPermissionState(permission = Manifest.permission.CAMERA)
+
+    var permissionRequested: Boolean by rememberSaveable { mutableStateOf(false) }
+
+    if (permissionRequested && cameraPermissionState.status.isGranted) {
+        permissionRequested = false
+        lensButton()
+    }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -123,7 +143,20 @@ fun CustomSearchBar(
                             modifier = Modifier
                                 .padding(start = 5.dp, end = 5.dp)
                                 .clickable {
-                                    lensButton()
+                                    val status = cameraPermissionState.status
+                                    if (status.isGranted) {
+                                        lensButton()
+                                    } else {
+                                        if (status.shouldShowRationale) {
+                                            CustomToast(
+                                                "Camera permission denied, please enable in settings.",
+                                                context
+                                            )
+                                        } else {
+                                            permissionRequested = true
+                                            cameraPermissionState.launchPermissionRequest()
+                                        }
+                                    }
                                 }
                         )
                     }
