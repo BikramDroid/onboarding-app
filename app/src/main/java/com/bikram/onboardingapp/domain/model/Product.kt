@@ -30,4 +30,21 @@ data class Product(
             it.contains(query, ignoreCase = true)
         }
     }
+
+    fun doesMatchSearchCustomQuery(query: String): Boolean {
+        var updatedQuery = query
+        if (updatedQuery.contains("Jewellery"))     //Tomato tomato -- GB/EN confusions messed up
+            updatedQuery = "Jewelery"
+        else if (updatedQuery.contains("Computer"))
+            updatedQuery = "monitor"
+
+        val matchingCombinations = listOf(
+            title,
+            category
+        )
+
+        return matchingCombinations.any {
+            it.contains(updatedQuery, ignoreCase = true)
+        }
+    }
 }

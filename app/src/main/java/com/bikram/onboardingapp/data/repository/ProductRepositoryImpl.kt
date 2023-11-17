@@ -52,10 +52,10 @@ class ProductRepositoryImpl @Inject constructor(
                 null
             }
 
-            remoteProducts?.let { listings ->
+            remoteProducts?.let { products ->
                 dao.clearProducts()
                 dao.insertProducts(
-                    listings.map { it.toProductEntity() }
+                    products.map { it.toProductEntity() }
                 )
                 emit(Resource.Success(
                     data = dao

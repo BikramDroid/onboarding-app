@@ -21,4 +21,6 @@
     <string name="coming_soon">Coming soon!</string>
     <string name="not_found">No product found</string>
     <string name="search_products">Search products</string>
+    <string name="a_r">AR</string>
+    <string name="obj_detection">Object deetection</string>
 </resources>
