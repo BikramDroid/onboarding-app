@@ -104,6 +104,10 @@ dependencies {
     // Permissions
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
+    // Widgets
+    implementation("androidx.glance:glance-appwidget:1.0.0")
+    implementation("androidx.glance:glance-material3:1.0.0")
+
     //Others
     implementation("io.github.pushpalroy:jetlime:1.0.3")
 
